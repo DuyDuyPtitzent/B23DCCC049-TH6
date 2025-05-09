@@ -1,4 +1,3 @@
-// src/components/itinerary/DayItinerary.tsx
 import React, { useState } from 'react';
 import { Card, Timeline, Divider, List, Badge, Collapse, Space, Button } from 'antd';
 import { Droppable, Draggable } from 'react-beautiful-dnd';
@@ -10,13 +9,13 @@ import DestinationItem from './DestinationItem';
 const { Panel } = Collapse;
 
 interface DayItineraryProps {
-  day: ItineraryDay;
-  dayIndex: number;
-  destinations: DestinationType[];
-  onAddDestination: (destination: DestinationType, dayIndex: number) => void;
-  onRemoveDestination: (dayIndex: number, destIndex: number) => void;
-  totalDays: number;
-  currentDay: number;
+  day: ItineraryDay; // Dữ liệu của 1 ngày cụ thể
+  dayIndex: number; // Chỉ số của ngày (0,1,2,...)
+  destinations: DestinationType[]; // Danh sách điểm đến có thể thêm
+  onAddDestination: (destination: DestinationType, dayIndex: number) => void; // Hàm xử lý khi thêm điểm đến
+  onRemoveDestination: (dayIndex: number, destIndex: number) => void; // Hàm xử lý khi xóa điểm đến
+  totalDays: number; // Tổng số ngày trong hành trình
+  currentDay: number; // Ngày hiện tại
 }
 
 const DayItinerary: React.FC<DayItineraryProps> = ({
@@ -28,9 +27,14 @@ const DayItinerary: React.FC<DayItineraryProps> = ({
   totalDays,
   currentDay
 }) => {
-  const isCurrentDay = dayIndex === currentDay - 1;
-  const [activeKey, setActiveKey] = useState<string | string[]>(isCurrentDay ? ['destinations', 'addNew'] : []);
+  const isCurrentDay = dayIndex === currentDay - 1; // Kiểm tra có phải ngày hiện tại không
 
+  // Mặc định mở panel nếu là ngày hiện tại
+  const [activeKey, setActiveKey] = useState<string | string[]>(
+    isCurrentDay ? ['destinations', 'addNew'] : []
+  );
+
+  // Tiêu đề cho Card của mỗi ngày
   const dayTitle = (
     <div style={{ display: 'flex', alignItems: 'center' }}>
       <Badge
@@ -59,6 +63,7 @@ const DayItinerary: React.FC<DayItineraryProps> = ({
         onChange={setActiveKey}
         expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0} />}
       >
+        {/* Panel hiển thị các điểm đến đã chọn */}
         <Panel
           header={
             <Space>
@@ -79,6 +84,7 @@ const DayItinerary: React.FC<DayItineraryProps> = ({
                   <div className="empty-day">Chưa có điểm đến nào cho ngày này</div>
                 ) : (
                   <Timeline>
+                    {/* Duyệt qua các điểm đến đã chọn */}
                     {day.destinations.map((dest, destIndex) => (
                       <Draggable
                         key={`${dest.id}-${destIndex}`}
@@ -106,12 +112,13 @@ const DayItinerary: React.FC<DayItineraryProps> = ({
                     ))}
                   </Timeline>
                 )}
-                {provided.placeholder}
+                {provided.placeholder /* Chỗ placeholder giúp kéo thả mượt mà */}
               </div>
             )}
           </Droppable>
         </Panel>
 
+        {/* Panel để thêm điểm đến mới */}
         <Panel
           header={
             <Space>
@@ -121,9 +128,12 @@ const DayItinerary: React.FC<DayItineraryProps> = ({
                 size="small"
                 icon={<PlusOutlined />}
                 onClick={(e) => {
-                  e.stopPropagation();
+                  e.stopPropagation(); // Ngăn việc sập panel khi click nút
                   if (!activeKey.includes('addNew')) {
-                    setActiveKey([...Array.isArray(activeKey) ? activeKey : [activeKey], 'addNew']);
+                    setActiveKey([
+                      ...Array.isArray(activeKey) ? activeKey : [activeKey],
+                      'addNew'
+                    ]);
                   }
                 }}
               >
@@ -142,12 +152,21 @@ const DayItinerary: React.FC<DayItineraryProps> = ({
                   <Card
                     hoverable
                     size="small"
-                    cover={<img alt={dest.name} src={dest.imageUrl} style={{ height: 100, objectFit: 'cover' }} />}
+                    cover={
+                      <img
+                        alt={dest.name}
+                        src={dest.imageUrl}
+                        style={{ height: 100, objectFit: 'cover' }}
+                      />
+                    }
                     onClick={() => {
-                      onAddDestination(dest, dayIndex);
-                      // Mở panel điểm đến sau khi thêm
+                      onAddDestination(dest, dayIndex); // Thêm điểm đến vào ngày hiện tại
+                      // Tự mở panel danh sách nếu chưa mở
                       if (!activeKey.includes('destinations')) {
-                        setActiveKey([...Array.isArray(activeKey) ? activeKey : [activeKey], 'destinations']);
+                        setActiveKey([
+                          ...Array.isArray(activeKey) ? activeKey : [activeKey],
+                          'destinations'
+                        ]);
                       }
                     }}
                   >
