@@ -1,4 +1,4 @@
-// src/components/itinerary/SavedItineraries.tsx
+// Import các thư viện React và các thành phần UI cần thiết
 import React, { useState, useEffect } from 'react';
 import { List, Card, Button, Popconfirm, Empty, Typography, Space, Tag } from 'antd';
 import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons';
@@ -6,34 +6,37 @@ import { formatPrice } from '../../../utils/bai6/helpers';
 
 const { Title, Text } = Typography;
 
+// Định nghĩa kiểu props cho component
 interface SavedItineraryProps {
-  onLoadItinerary: (itinerary: any) => void;
+  onLoadItinerary: (itinerary: any) => void; // Hàm callback khi người dùng muốn xem chi tiết lịch trình
 }
 
+// Component hiển thị danh sách các lịch trình đã lưu
 const SavedItineraries: React.FC<SavedItineraryProps> = ({ onLoadItinerary }) => {
+  // State lưu danh sách lịch trình
   const [savedItineraries, setSavedItineraries] = useState<any[]>([]);
 
+  // Khi component được mount, lấy danh sách lịch trình từ localStorage
   useEffect(() => {
-    // Lấy danh sách lịch trình từ localStorage khi component được mount
     const itineraries = JSON.parse(localStorage.getItem('savedItineraries') || '[]');
     setSavedItineraries(itineraries);
   }, []);
 
+  // Hàm xóa một lịch trình dựa vào id
   const handleDeleteItinerary = (id: string) => {
-    // Lọc ra các lịch trình không phải lịch trình cần xóa
-    const updatedItineraries = savedItineraries.filter(item => item.id !== id);
-
-    // Cập nhật state và localStorage
-    setSavedItineraries(updatedItineraries);
-    localStorage.setItem('savedItineraries', JSON.stringify(updatedItineraries));
+    const updatedItineraries = savedItineraries.filter(item => item.id !== id); // Xóa lịch trình khỏi danh sách
+    setSavedItineraries(updatedItineraries); // Cập nhật lại state
+    localStorage.setItem('savedItineraries', JSON.stringify(updatedItineraries)); // Cập nhật localStorage
   };
 
+  // Hàm gọi callback để tải lịch trình được chọn
   const handleLoadItinerary = (itinerary: any) => {
     onLoadItinerary(itinerary);
   };
 
   return (
     <Card title="Lịch trình đã lưu">
+      {/* Nếu có ít nhất một lịch trình được lưu */}
       {savedItineraries.length > 0 ? (
         <List
           itemLayout="vertical"
@@ -42,6 +45,7 @@ const SavedItineraries: React.FC<SavedItineraryProps> = ({ onLoadItinerary }) =>
             <List.Item
               key={item.id}
               actions={[
+                // Nút xem chi tiết
                 <Button
                   type="primary"
                   icon={<EyeOutlined />}
@@ -49,6 +53,7 @@ const SavedItineraries: React.FC<SavedItineraryProps> = ({ onLoadItinerary }) =>
                 >
                   Xem
                 </Button>,
+                // Nút xóa với Popconfirm để xác nhận
                 <Popconfirm
                   title="Bạn có chắc chắn muốn xóa lịch trình này?"
                   onConfirm={() => handleDeleteItinerary(item.id)}
@@ -59,6 +64,7 @@ const SavedItineraries: React.FC<SavedItineraryProps> = ({ onLoadItinerary }) =>
                 </Popconfirm>
               ]}
             >
+              {/* Thông tin cơ bản của lịch trình */}
               <List.Item.Meta
                 title={item.name}
                 description={
@@ -75,6 +81,7 @@ const SavedItineraries: React.FC<SavedItineraryProps> = ({ onLoadItinerary }) =>
           )}
         />
       ) : (
+        // Nếu chưa có lịch trình nào, hiển thị Empty
         <Empty description="Chưa có lịch trình nào được lưu" />
       )}
     </Card>
