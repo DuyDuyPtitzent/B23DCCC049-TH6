@@ -2,7 +2,6 @@ import type { IColumn } from '@/components/Table/typing';
 import { Button, Form, Input, Modal, Table } from 'antd';
 import { useEffect, useState } from 'react';
 import { useModel } from 'umi';
-//
 const RandomUser = () => {
 	const { data, getDataUser } = useModel('randomuser');
 	const [visible, setVisible] = useState<boolean>(false);
