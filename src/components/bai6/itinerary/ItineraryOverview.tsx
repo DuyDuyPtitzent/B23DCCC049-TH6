@@ -1,4 +1,3 @@
-// src/components/itinerary/ItineraryOverview.tsx
 import React, { useState } from 'react';
 import { Card, Typography, Statistic, Row, Col, Divider, Collapse, Badge, Tag, Space, Empty } from 'antd';
 import { CarOutlined, DollarOutlined, ClockCircleOutlined, EnvironmentOutlined } from '@ant-design/icons';
@@ -9,48 +8,46 @@ const { Title, Text } = Typography;
 const { Panel } = Collapse;
 
 interface ItineraryOverviewProps {
-  itinerary: ItineraryDay[];
-  totalCost: number;
-  currentDay?: number; // Thêm prop ngày hiện tại (tùy chọn)
+  itinerary: ItineraryDay[]; // Mảng các ngày trong lịch trình, mỗi ngày gồm nhiều điểm đến
+  totalCost: number;         // Tổng chi phí cho toàn bộ lịch trình
+  currentDay?: number;       // Ngày hiện tại (tuỳ chọn), mặc định là 1 nếu không truyền
 }
 
 const ItineraryOverview: React.FC<ItineraryOverviewProps> = ({
   itinerary,
   totalCost,
-  currentDay = 1 // Mặc định là ngày 1 nếu không được truyền vào
+  currentDay = 1
 }) => {
+  // Tính tổng số điểm đến trong toàn bộ lịch trình
   const totalDestinations = itinerary.reduce((acc, day) => acc + day.destinations.length, 0);
 
-  // State để theo dõi panel đang mở
+  // State để theo dõi panel nào đang mở trong Collapse
   const [activeKey, setActiveKey] = useState<string | string[]>([`${currentDay - 1}`]);
 
-  // Tính tổng chi phí cho mỗi ngày
+  // Hàm tính chi phí cho một ngày cụ thể
   const calculateDayCost = (day: ItineraryDay) => {
     return day.destinations.reduce((sum, dest) => sum + dest.price, 0);
   };
 
-  // Tính tổng thời gian di chuyển trong ngày
+  // Hàm tính tổng thời gian di chuyển trong một ngày
   const calculateDayTravelTime = (day: ItineraryDay) => {
     let totalMinutes = 0;
     for (let i = 1; i < day.destinations.length; i++) {
-      const from = day.destinations[i-1];
+      const from = day.destinations[i - 1];
       const to = day.destinations[i];
       const distance = calculateDistance(from, to);
-      // Giả sử 1km mất khoảng 2 phút
-      totalMinutes += distance * 2;
+      totalMinutes += distance * 2; // Giả sử 1 km = 2 phút di chuyển
     }
 
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
 
-    if (hours > 0) {
-      return `${hours}h ${minutes}m`;
-    }
-    return `${minutes}m`;
+    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
   };
 
   return (
     <Card className="overview-card">
+      {/* Hiển thị thống kê tổng quát */}
       <Row gutter={[16, 16]}>
         <Col xs={24} md={8}>
           <Statistic
@@ -61,23 +58,16 @@ const ItineraryOverview: React.FC<ItineraryOverviewProps> = ({
           />
         </Col>
         <Col xs={24} md={8}>
-          <Statistic
-            title="Tổng số ngày"
-            value={itinerary.length}
-            suffix="ngày"
-          />
+          <Statistic title="Tổng số ngày" value={itinerary.length} suffix="ngày" />
         </Col>
         <Col xs={24} md={8}>
-          <Statistic
-            title="Tổng số điểm đến"
-            value={totalDestinations}
-            suffix="địa điểm"
-          />
+          <Statistic title="Tổng số điểm đến" value={totalDestinations} suffix="địa điểm" />
         </Col>
       </Row>
 
       <Divider />
 
+      {/* Nếu có điểm đến thì render chi tiết từng ngày, ngược lại hiển thị Empty */}
       {totalDestinations > 0 ? (
         <Collapse
           activeKey={activeKey}
@@ -85,8 +75,10 @@ const ItineraryOverview: React.FC<ItineraryOverviewProps> = ({
           className="itinerary-collapse"
         >
           {itinerary.map((day, index) => {
-            const dayCost = calculateDayCost(day);
-            const travelTime = day.destinations.length > 1 ? calculateDayTravelTime(day) : "0m";
+            const dayCost = calculateDayCost(day); // Tổng chi phí ngày
+            const travelTime = day.destinations.length > 1
+              ? calculateDayTravelTime(day)
+              : "0m"; // Tổng thời gian di chuyển ngày
             const isCurrentDay = index === currentDay - 1;
 
             return (
@@ -112,6 +104,7 @@ const ItineraryOverview: React.FC<ItineraryOverviewProps> = ({
                   </Space>
                 }
               >
+                {/* Nếu có điểm đến thì hiển thị từng điểm, nếu không hiển thị Empty */}
                 {day.destinations.length > 0 ? (
                   <div className="day-destinations">
                     {day.destinations.map((dest, i) => (
@@ -123,6 +116,7 @@ const ItineraryOverview: React.FC<ItineraryOverviewProps> = ({
                       >
                         <Row gutter={[8, 8]} align="middle">
                           <Col xs={24} sm={6}>
+                            {/* Hình ảnh địa điểm */}
                             <img
                               src={dest.imageUrl}
                               alt={dest.name}
@@ -141,8 +135,12 @@ const ItineraryOverview: React.FC<ItineraryOverviewProps> = ({
                               <Text><DollarOutlined /> {formatPrice(dest.price)}</Text>
                               {i > 0 && (
                                 <Space>
-                                  <Text><CarOutlined /> {calculateDistance(day.destinations[i-1], dest)} km</Text>
-                                  <Text><ClockCircleOutlined /> {calculateTravelTime(day.destinations[i-1], dest)}</Text>
+                                  <Text>
+                                    <CarOutlined /> {calculateDistance(day.destinations[i - 1], dest)} km
+                                  </Text>
+                                  <Text>
+                                    <ClockCircleOutlined /> {calculateTravelTime(day.destinations[i - 1], dest)}
+                                  </Text>
                                 </Space>
                               )}
                             </Space>
@@ -151,6 +149,7 @@ const ItineraryOverview: React.FC<ItineraryOverviewProps> = ({
                       </Card>
                     ))}
 
+                    {/* Tóm tắt ngày nếu có nhiều hơn 1 điểm */}
                     {day.destinations.length > 1 && (
                       <Card size="small" className="day-summary-card">
                         <Row gutter={16}>
