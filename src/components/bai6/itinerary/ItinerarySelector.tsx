@@ -1,4 +1,4 @@
-// src/components/budget/ItinerarySelector.tsx
+// Import các thư viện và component cần thiết
 import React from 'react';
 import { Card, Select, Empty, Typography, Space, Tag } from 'antd';
 import { CalendarOutlined, DollarOutlined } from '@ant-design/icons';
@@ -8,43 +8,50 @@ import moment from 'moment';
 const { Text, Title } = Typography;
 const { Option } = Select;
 
+// Định nghĩa kiểu dữ liệu cho một lịch trình đã lưu
 interface SavedItinerary {
   id: string;
   name: string;
-  dateRange: [string, string];
+  dateRange: [string, string]; // Khoảng thời gian từ - đến
   days: {
     date: string;
-    destinations: any[];
+    destinations: any[]; // Danh sách điểm đến cho mỗi ngày
   }[];
   budget: number;
   totalCost: number;
   createdAt: string;
 }
 
+// Props được truyền vào component
 interface ItinerarySelectorProps {
-  itineraries: SavedItinerary[];
-  selectedItinerary: SavedItinerary | null;
-  onSelectItinerary: (itinerary: SavedItinerary) => void;
+  itineraries: SavedItinerary[]; // Danh sách tất cả lịch trình đã lưu
+  selectedItinerary: SavedItinerary | null; // Lịch trình đang được chọn
+  onSelectItinerary: (itinerary: SavedItinerary) => void; // Hàm callback khi chọn lịch trình
 }
 
+// Component dùng để chọn một lịch trình trong danh sách
 const ItinerarySelector: React.FC<ItinerarySelectorProps> = ({
   itineraries,
   selectedItinerary,
   onSelectItinerary
 }) => {
+  
+  // Khi người dùng chọn một lịch trình từ dropdown
   const handleChange = (itineraryId: string) => {
-    const selected = itineraries.find(item => item.id === itineraryId);
+    const selected = itineraries.find(item => item.id === itineraryId); // Tìm lịch trình tương ứng
     if (selected) {
-      onSelectItinerary(selected);
+      onSelectItinerary(selected); // Gọi callback để cập nhật
     }
   };
 
   return (
     <Card className="itinerary-selector-card" style={{ marginBottom: 16 }}>
       <Title level={4}>Chọn lịch trình</Title>
-      
+
+      {/* Nếu có ít nhất một lịch trình được lưu */}
       {itineraries.length > 0 ? (
         <div>
+          {/* Dropdown danh sách lịch trình */}
           <Select
             style={{ width: '100%' }}
             placeholder="Chọn lịch trình để quản lý ngân sách"
@@ -52,6 +59,7 @@ const ItinerarySelector: React.FC<ItinerarySelectorProps> = ({
             onChange={handleChange}
             optionLabelProp="label"
           >
+            {/* Render từng option của lịch trình */}
             {itineraries.map(itinerary => (
               <Option 
                 key={itinerary.id} 
@@ -73,6 +81,7 @@ const ItinerarySelector: React.FC<ItinerarySelectorProps> = ({
             ))}
           </Select>
           
+          {/* Hiển thị thông tin chi tiết của lịch trình đã chọn */}
           {selectedItinerary && (
             <div className="selected-itinerary-info" style={{ marginTop: 16 }}>
               <Text strong>Lịch trình đã chọn: </Text>
@@ -87,6 +96,7 @@ const ItinerarySelector: React.FC<ItinerarySelectorProps> = ({
           )}
         </div>
       ) : (
+        // Hiển thị thông báo khi không có lịch trình nào
         <Empty 
           description="Chưa có lịch trình nào được lưu. Vui lòng tạo lịch trình trước khi quản lý ngân sách."
           image={Empty.PRESENTED_IMAGE_SIMPLE}
